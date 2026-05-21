@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Report</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, sans-serif;
+        }
+
+        body{
+            background:#f4f7fb;
+            color:#222;
+            line-height:1.7;
+        }
+
+        .container{
+            width:90%;
+            max-width:1100px;
+            margin:auto;
+            padding:40px 0;
+        }
+
+        .cover{
+            background:linear-gradient(135deg,#4f46e5,#7c3aed);
+            color:white;
+            text-align:center;
+            padding:80px 40px;
+            border-radius:20px;
+            margin-bottom:40px;
+            box-shadow:0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .cover h1{
+            font-size:45px;
+            margin-bottom:15px;
+        }
+
+        .cover p{
+            font-size:18px;
+            opacity:0.95;
+        }
+
+        .section{
+            background:white;
+            padding:30px;
+            margin-bottom:30px;
+            border-radius:15px;
+            box-shadow:0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .section h2{
+            color:#4f46e5;
+            margin-bottom:20px;
+            border-bottom:2px solid #eee;
+            padding-bottom:10px;
+        }
+
+        ul{
+            padding-left:20px;
+        }
+
+        li{
+            margin-bottom:10px;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+            margin-top:20px;
+        }
+
+        table th,
+        table td{
+            border:1px solid #ddd;
+            padding:12px;
+            text-align:left;
+        }
+
+        table th{
+            background:#4f46e5;
+            color:white;
+        }
+
+        .grid{
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+            gap:20px;
+            margin-top:20px;
+        }
+
+        .card{
+            background:#f8fafc;
+            padding:20px;
+            border-left:5px solid #4f46e5;
+            border-radius:12px;
+            transition:0.3s;
+        }
+
+        .card:hover{
+            transform:translateY(-5px);
+        }
+
+        .card h3{
+            margin-bottom:10px;
+            color:#4f46e5;
+        }
+
+        footer{
+            text-align:center;
+            padding:30px;
+            color:#555;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- COVER PAGE -->
+
+        <div class="cover">
+
+            <h1>📱 Social Media Impact on Teenagers</h1>
+
+            <p>
+                Data Analysis & Behavioral Analytics Project Report
+            </p>
+
+            <br>
+
+            <p>
+                Prepared By : Alikaif jafri
+            </p>
+
+        </div>
+
+        <!-- INTRODUCTION -->
+
+        <div class="section">
+
+            <h2>📌 Introduction</h2>
+
+            <p>
+                Social media has become an important part of teenagers' daily lives.
+                Excessive use of social media platforms may affect mental health,
+                sleep quality, academic performance, and overall lifestyle behavior.
+                This project focuses on analyzing teenagers' behavioral patterns
+                using data analysis techniques and feature engineering.
+            </p>
+
+        </div>
+
+        <!-- OBJECTIVES -->
+
+        <div class="section">
+
+            <h2>🎯 Objectives</h2>
+
+            <ul>
+                <li>Analyze teenagers’ social media usage behavior</li>
+                <li>Study the relationship between screen time and mental health</li>
+                <li>Understand the effect of sleep and physical activity</li>
+                <li>Perform feature engineering for better analysis</li>
+                <li>Prepare the dataset for machine learning models</li>
+            </ul>
+
+        </div>
+
+        <!-- DATASET DESCRIPTION -->
+
+        <div class="section">
+
+            <h2>📂 Dataset Description</h2>
+
+            <table>
+
+                <tr>
+                    <th>Column Name</th>
+                    <th>Description</th>
+                </tr>
+
+                <tr>
+                    <td>daily_social_media_hours</td>
+                    <td>Daily social media usage hours</td>
+                </tr>
+
+                <tr>
+                    <td>platform_usage</td>
+                    <td>Most used social media platform</td>
+                </tr>
+
+                <tr>
+                    <td>screen_time_before_sleep</td>
+                    <td>Screen usage before sleeping</td>
+                </tr>
+
+                <tr>
+                    <td>sleep_hours</td>
+                    <td>Average sleeping hours</td>
+                </tr>
+
+                <tr>
+                    <td>stress_level</td>
+                    <td>Stress score</td>
+                </tr>
+
+                <tr>
+                    <td>anxiety_level</td>
+                    <td>Anxiety score</td>
+                </tr>
+
+                <tr>
+                    <td>addiction_level</td>
+                    <td>Social media addiction level</td>
+                </tr>
+
+                <tr>
+                    <td>academic_performance</td>
+                    <td>Academic performance score</td>
+                </tr>
+
+                <tr>
+                    <td>depression_label</td>
+                    <td>Depression prediction label</td>
+                </tr>
+
+            </table>
+
+        </div>
+
+        <!-- DATA CLEANING -->
+
+        <div class="section">
+
+            <h2>🧹 Data Cleaning & Preprocessing</h2>
+
+            <ul>
+                <li>Removed duplicate values</li>
+                <li>Handled missing values</li>
+                <li>Validated logical ranges</li>
+                <li>Handled outliers using IQR method</li>
+                <li>Standardized categorical values</li>
+                <li>Reorganized dataset columns</li>
+            </ul>
+
+        </div>
+
+        <!-- FEATURE ENGINEERING -->
+
+        <div class="section">
+
+            <h2>⚙ Feature Engineering</h2>
+
+            <div class="grid">
+
+                <div class="card">
+
+                    <h3>mental_health_score</h3>
+
+                    <p>
+                        Combined indicator created using stress, anxiety,
+                        and addiction levels.
+                    </p>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>sleep_category</h3>
+
+                    <p>
+                        Categorized sleep quality into Poor,
+                        Average, and Good.
+                    </p>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>usage_category</h3>
+
+                    <p>
+                        Categorized social media usage into
+                        Low, Moderate, and High.
+                    </p>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>wellness_score</h3>
+
+                    <p>
+                        Combined score of sleep, physical activity,
+                        and academic performance.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- EDA -->
+
+        <div class="section">
+
+            <h2>📊 Exploratory Data Analysis</h2>
+
+            <ul>
+                <li>Correlation Heatmap Analysis</li>
+                <li>Stress vs Social Media Usage Analysis</li>
+                <li>Sleep Quality Comparison</li>
+                <li>Platform Usage Comparison</li>
+                <li>Gender-Based Mental Health Analysis</li>
+                <li>Addiction vs Academic Performance Analysis</li>
+            </ul>
+
+        </div>
+
+        <!-- EXPECTED INSIGHTS -->
+
+        <div class="section">
+
+            <h2>🔍 Key Insights</h2>
+
+            <ul>
+                <li>Higher social media usage may increase stress and anxiety</li>
+                <li>Late-night screen exposure may reduce sleep quality</li>
+                <li>High addiction levels may negatively affect academics</li>
+                <li>Physical activity may improve wellness and mental health</li>
+            </ul>
+
+        </div>
+
+        <!-- FUTURE SCOPE -->
+
+        <div class="section">
+
+            <h2>🚀 Future Scope</h2>
+
+            <ul>
+                <li>Depression prediction using machine learning</li>
+                <li>Mental health classification system</li>
+                <li>Behavioral analytics dashboard</li>
+                <li>Advanced predictive analysis</li>
+            </ul>
+
+        </div>
+
+        <!-- CONCLUSION -->
+
+        <div class="section">
+
+            <h2>📌 Conclusion</h2>
+
+            <p>
+                This project demonstrates how social media usage patterns
+                influence teenagers' mental health, sleep quality,
+                academic performance, and overall lifestyle behavior.
+                The dataset provides strong opportunities for data analysis,
+                behavioral analytics, and machine learning applications.
+            </p>
+
+        </div>
+
+    </div>
+
+    <footer>
+
+        👨‍💻 Developed By Alikaif jafri | Data Analysis Project
+
+    </footer>
+
+</body>
+
+</html>
