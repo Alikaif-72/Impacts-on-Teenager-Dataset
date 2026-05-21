@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teen Mental Health Analytics Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060b14;
+    --surface: #0d1626;
+    --card: #101d30;
+    --border: #1a2d47;
+    --accent1: #00e5ff;
+    --accent2: #ff4d8d;
+    --accent3: #7c3aed;
+    --accent4: #00ff9d;
+    --accent5: #ff9f0a;
+    --text: #e2eaf5;
+    --muted: #6a85a8;
+    --glow1: rgba(0,229,255,0.15);
+    --glow2: rgba(255,77,141,0.15);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 20% 10%, rgba(124,58,237,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 80% 90%, rgba(0,229,255,0.08) 0%, transparent 60%);
+  }
+
+  /* HEADER */
+  .header {
+    padding: 28px 40px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(180deg, rgba(13,22,38,0.9) 0%, transparent 100%);
+    position: sticky; top: 0; z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+  .header-left { display: flex; align-items: center; gap: 16px; }
+  .brain-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--accent3), var(--accent1));
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 0 20px rgba(124,58,237,0.5);
+  }
+  .header h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+  .header h1 span { color: var(--accent1); }
+  .header-sub { font-size: 12px; color: var(--muted); font-family: 'Space Mono', monospace; margin-top:2px; }
+  .badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--accent4);
+    background: rgba(0,255,157,0.07);
+    letter-spacing: 0.05em;
+  }
+
+  /* MAIN */
+  .main { padding: 28px 40px 48px; max-width: 1600px; margin: 0 auto; }
+
+  /* KPI ROW */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+  .kpi-card::before {
+    content: '';
+    position: absolute; top:0; left:0; right:0; height:3px;
+  }
+  .kpi-card.c1::before { background: linear-gradient(90deg, var(--accent1), transparent); box-shadow: 0 0 12px var(--accent1); }
+  .kpi-card.c2::before { background: linear-gradient(90deg, var(--accent2), transparent); box-shadow: 0 0 12px var(--accent2); }
+  .kpi-card.c3::before { background: linear-gradient(90deg, var(--accent3), transparent); }
+  .kpi-card.c4::before { background: linear-gradient(90deg, var(--accent4), transparent); }
+  .kpi-card.c5::before { background: linear-gradient(90deg, var(--accent5), transparent); }
+  .kpi-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; font-family: 'Space Mono', monospace; }
+  .kpi-value { font-size: 32px; font-weight: 800; line-height: 1; }
+  .kpi-card.c1 .kpi-value { color: var(--accent1); }
+  .kpi-card.c2 .kpi-value { color: var(--accent2); }
+  .kpi-card.c3 .kpi-value { color: #a78bfa; }
+  .kpi-card.c4 .kpi-value { color: var(--accent4); }
+  .kpi-card.c5 .kpi-value { color: var(--accent5); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 6px; }
+  .kpi-icon { position: absolute; right: 16px; top: 16px; font-size: 28px; opacity: 0.18; }
+
+  /* CHART GRID */
+  .chart-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  .chart-grid-2 {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  .chart-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  .chart-grid-4 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .chart-card.span2 { grid-column: span 2; }
+  .chart-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .chart-title .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+  canvas { max-width: 100%; }
+
+  /* INSIGHT CARDS */
+  .insight-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .insight-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .insight-tag {
+    font-size: 10px;
+    font-family: 'Space Mono', monospace;
+    color: var(--accent1);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .insight-title { font-size: 14px; font-weight: 700; }
+  .insight-desc { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    padding: 20px;
+    color: var(--muted);
+    font-size: 11px;
+    font-family: 'Space Mono', monospace;
+    border-top: 1px solid var(--border);
+  }
+
+  /* SECTION LABEL */
+  .section-label {
+    font-size: 11px;
+    color: var(--accent3);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Bar horizontal custom */
+  .hbar-wrap { display: flex; flex-direction: column; gap: 10px; padding-top: 4px; }
+  .hbar-row { display: flex; align-items: center; gap: 10px; }
+  .hbar-label { font-size: 12px; color: var(--muted); width: 80px; text-align:right; flex-shrink:0; font-family: 'Space Mono', monospace; }
+  .hbar-track { flex: 1; height: 10px; background: var(--border); border-radius: 6px; overflow: hidden; }
+  .hbar-fill { height: 100%; border-radius: 6px; transition: width 1.2s cubic-bezier(0.25,0.46,0.45,0.94); }
+  .hbar-val { font-size: 11px; color: var(--text); width: 36px; flex-shrink:0; font-family: 'Space Mono', monospace; }
+
+  /* Gauge */
+  .gauge-row { display: flex; gap: 20px; justify-content: space-around; padding-top: 8px; }
+  .gauge-item { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .gauge-circle {
+    width: 70px; height: 70px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 800;
+    position: relative;
+  }
+  .gauge-name { font-size: 11px; color: var(--muted); text-align: center; font-family: 'Space Mono', monospace; }
+  
+  /* Scroll animate */
+  @keyframes fadeUp {
+    from { opacity:0; transform: translateY(20px); }
+    to { opacity:1; transform: translateY(0); }
+  }
+  .kpi-card, .chart-card, .insight-card {
+    animation: fadeUp 0.5s ease both;
+  }
+  .kpi-card:nth-child(1) { animation-delay: 0.05s; }
+  .kpi-card:nth-child(2) { animation-delay: 0.10s; }
+  .kpi-card:nth-child(3) { animation-delay: 0.15s; }
+  .kpi-card:nth-child(4) { animation-delay: 0.20s; }
+  .kpi-card:nth-child(5) { animation-delay: 0.25s; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="brain-icon">🧠</div>
+    <div>
+      <h1>Teen <span>Mental Health</span> Analytics</h1>
+      <div class="header-sub">n=1,200 | Ages 13–19 | Social Media & Wellbeing Study</div>
+    </div>
+  </div>
+  <div class="badge">✦ CLEANED DATASET v1.0</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- KPI SECTION -->
+  <div class="section-label">01 — Key Metrics Overview</div>
+  <div class="kpi-grid">
+    <div class="kpi-card c1">
+      <div class="kpi-icon">👥</div>
+      <div class="kpi-label">Total Participants</div>
+      <div class="kpi-value">1,200</div>
+      <div class="kpi-sub">Ages 13–19 · 51.3% Male</div>
+    </div>
+    <div class="kpi-card c2">
+      <div class="kpi-icon">📱</div>
+      <div class="kpi-label">Avg. Social Media / Day</div>
+      <div class="kpi-value">4.54<span style="font-size:16px;font-weight:400"> hrs</span></div>
+      <div class="kpi-sub">Range: 1.0 – 8.0 hrs</div>
+    </div>
+    <div class="kpi-card c3">
+      <div class="kpi-icon">😔</div>
+      <div class="kpi-label">Depression Risk Rate</div>
+      <div class="kpi-value">2.6<span style="font-size:16px;font-weight:400">%</span></div>
+      <div class="kpi-sub">31 of 1,200 teens flagged</div>
+    </div>
+    <div class="kpi-card c4">
+      <div class="kpi-icon">🌟</div>
+      <div class="kpi-label">Avg. Wellness Score</div>
+      <div class="kpi-value">3.48<span style="font-size:16px;font-weight:400">/5</span></div>
+      <div class="kpi-sub">Peak: Good sleepers → 3.98</div>
+    </div>
+    <div class="kpi-card c5">
+      <div class="kpi-icon">😴</div>
+      <div class="kpi-label">Avg. Sleep / Night</div>
+      <div class="kpi-value">6.45<span style="font-size:16px;font-weight:400"> hrs</span></div>
+      <div class="kpi-sub">Recommended: 8–10 hrs</div>
+    </div>
+  </div>
+
+  <!-- ROW 1 -->
+  <div class="section-label">02 — Platform & Usage Patterns</div>
+  <div class="chart-grid">
+    <!-- Platform Donut -->
+    <div class="chart-card">
+      <div class="chart-title"><span class="dot" style="background:var(--accent1)"></span>Platform Usage Split</div>
+      <canvas id="platformDonut" height="200"></canvas>
+    </div>
+    <!-- Usage Category -->
+    <div class="chart-card">
+      <div class="chart-title"><span class="dot" style="background:var(--accent2)"></span>Usage Category Distribution</div>
+      <canvas id="usageBar" height="200"></canvas>
+    </div>
+    <!-- Gender -->
+    <div class="chart-card">
+      <div class="chart-title"><span class="dot" style="background:var(--accent3)"></span>Gender Split</div>
+      <canvas id="genderDonut" height="200"></canvas>
+    </div>
+  </div>
+
+  <!-- ROW 2 -->
+  <div class="section-label">03 — Sleep & Mental Health Correlation</div>
+  <div class="chart-grid-4">
+    <!-- Sleep Quality Bar -->
+    <div class="chart-card">
+      <div class="chart-title"><span class="dot" style="background:var(--accent4)"></span>Sleep Quality vs Wellness Score</div>
+      <canvas id="sleepWellness" height="220"></canvas>
+    </div>
+    <!-- Sleep Category Donut -->
+    <div class="chart-card">
+      <div class="chart-title"><span class="dot" style="background:var(--accent5)"></span>Sleep Category Distribution</div>
+      <canvas id="sleepDonut" height="220"></canvas>
+    </div>
+  </div>
+
+  <!-- ROW 3 -->
+  <div class="section-label">04 — Stress, Anxiety & Mental Health by Age</div>
+  <div class="chart-grid-2">
+    <!-- Age Line -->
+    <div class="chart-card">
+      <div class="chart-title"><span class="dot" style="background:var(--accent1)"></span>Stress & Anxiety Levels Across Age Groups</div>
+      <canvas id="ageLine" height="180"></canvas>
+    </div>
+    <!-- Social Interaction -->
+    <div class="chart-card">
+      <div class="chart-title"><span class="dot" style="background:var(--accent2)"></span>Social Interaction Level</div>
+      <canvas id="socialBar" height="180"></canvas>
+    </div>
+  </div>
+
+  <!-- ROW 4 -->
+  <div class="section-label">05 — Platform Impact Analysis</div>
+  <div class="chart-grid">
+    <!-- Platform vs Stress/Anxiety -->
+    <div class="chart-card">
+      <div class="chart-title"><span class="dot" style="background:var(--accent5)"></span>Platform vs Stress / Anxiety</div>
+      <canvas id="platformStress" height="200"></canvas>
+    </div>
+    <!-- Addiction Level Distribution -->
+    <div class="chart-card">
+      <div class="chart-title"><span class="dot" style="background:var(--accent3)"></span>Addiction Level Distribution (1–10)</div>
+      <canvas id="addictionBar" height="200"></canvas>
+    </div>
+    <!-- TikTok Depression -->
+    <div class="chart-card">
+      <div class="chart-title"><span class="dot" style="background:var(--accent2)"></span>Depression Risk by Platform</div>
+      <canvas id="depressionPlatform" height="200"></canvas>
+    </div>
+  </div>
+
+  <!-- ROW 5 — Correlation horizontal bars -->
+  <div class="section-label">06 — Key Correlations with Mental Health Score</div>
+  <div class="chart-grid-4">
+    <div class="chart-card">
+      <div class="chart-title"><span class="dot" style="background:var(--accent1)"></span>Feature Correlation to Mental Health Score</div>
+      <canvas id="corrChart" height="240"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title"><span class="dot" style="background:var(--accent4)"></span>Academic Performance vs Wellness</div>
+      <canvas id="acadWellness" height="240"></canvas>
+    </div>
+  </div>
+
+  <!-- INSIGHTS -->
+  <div class="section-label">07 — Key Findings</div>
+  <div class="insight-grid">
+    <div class="insight-card">
+      <div class="insight-tag">Finding #01</div>
+      <div class="insight-title">Anxiety Drives MH Score</div>
+      <div class="insight-desc">Anxiety level has the highest correlation (r=0.59) with mental health score, stronger than even stress level.</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-tag">Finding #02</div>
+      <div class="insight-title">TikTok → Higher Depression</div>
+      <div class="insight-desc">TikTok users show 3.0% depression rate vs. 2.3% for "Both" platform users — the highest among all groups.</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-tag">Finding #03</div>
+      <div class="insight-title">Poor Sleep Tanks Wellness</div>
+      <div class="insight-desc">Poor sleepers average 2.79 wellness score vs. 3.98 for good sleepers — a 43% gap in wellbeing.</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-tag">Finding #04</div>
+      <div class="insight-title">Age 14 Most Stressed</div>
+      <div class="insight-desc">14-year-olds have the highest stress level (6.18/10), while 15-year-olds report the highest anxiety (5.92/10).</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">TEEN MENTAL HEALTH ANALYTICS DASHBOARD · DATA SCIENCE PROJECT · ALIKAIF · SHOBHIT UNIVERSITY</div>
+
+<script>
+// ── CHART DEFAULTS ──
+Chart.defaults.color = '#6a85a8';
+Chart.defaults.font.family = "'Space Mono', monospace";
+Chart.defaults.font.size = 11;
+
+const accentColors = ['#00e5ff','#ff4d8d','#a78bfa','#00ff9d','#ff9f0a'];
+
+// 1. Platform Donut
+new Chart(document.getElementById('platformDonut'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Instagram', 'TikTok', 'Both'],
+    datasets: [{
+      data: [411, 398, 391],
+      backgroundColor: ['#00e5ff','#ff4d8d','#a78bfa'],
+      borderColor: '#101d30',
+      borderWidth: 3,
+      hoverOffset: 8
+    }]
+  },
+  options: {
+    cutout: '68%',
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 16, boxWidth: 12, font: { size: 11 } } },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw} teens (${((ctx.raw/1200)*100).toFixed(1)}%)` } }
+    }
+  }
+});
+
+// 2. Usage Category Bar
+new Chart(document.getElementById('usageBar'), {
+  type: 'bar',
+  data: {
+    labels: ['High', 'Moderate', 'Low'],
+    datasets: [{
+      label: 'Teens',
+      data: [532, 517, 151],
+      backgroundColor: ['#ff4d8d88','#00e5ff88','#00ff9d88'],
+      borderColor: ['#ff4d8d','#00e5ff','#00ff9d'],
+      borderWidth: 2,
+      borderRadius: 8
+    }]
+  },
+  options: {
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: '#1a2d47' } },
+      y: { grid: { color: '#1a2d47' }, beginAtZero: true }
+    }
+  }
+});
+
+// 3. Gender Donut
+new Chart(document.getElementById('genderDonut'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Male', 'Female'],
+    datasets: [{
+      data: [615, 585],
+      backgroundColor: ['#00e5ff','#ff4d8d'],
+      borderColor: '#101d30',
+      borderWidth: 3,
+      hoverOffset: 8
+    }]
+  },
+  options: {
+    cutout: '68%',
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 16, boxWidth: 12 } },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw} (${((ctx.raw/1200)*100).toFixed(1)}%)` } }
+    }
+  }
+});
+
+// 4. Sleep vs Wellness
+new Chart(document.getElementById('sleepWellness'), {
+  type: 'bar',
+  data: {
+    labels: ['Poor Sleep', 'Average Sleep', 'Good Sleep'],
+    datasets: [
+      {
+        label: 'Wellness Score',
+        data: [2.79, 3.33, 3.98],
+        backgroundColor: ['#ff4d8d88','#ff9f0a88','#00ff9d88'],
+        borderColor: ['#ff4d8d','#ff9f0a','#00ff9d'],
+        borderWidth: 2,
+        borderRadius: 8,
+        yAxisID: 'y'
+      },
+      {
+        label: 'Stress Level',
+        data: [5.46, 5.50, 5.39],
+        backgroundColor: ['rgba(0,229,255,0.3)'],
+        borderColor: ['#00e5ff'],
+        borderWidth: 2,
+        borderRadius: 8,
+        type: 'line',
+        tension: 0.4,
+        yAxisID: 'y2',
+        pointRadius: 5,
+        pointBackgroundColor: '#00e5ff'
+      }
+    ]
+  },
+  options: {
+    plugins: { legend: { position: 'top', labels: { padding: 12, boxWidth: 10 } } },
+    scales: {
+      x: { grid: { color: '#1a2d47' } },
+      y: { grid: { color: '#1a2d47' }, min: 0, max: 5, title: { display: true, text: 'Wellness', color: '#6a85a8' } },
+      y2: { position: 'right', grid: { display: false }, min: 5, max: 6, title: { display: true, text: 'Stress', color: '#6a85a8' } }
+    }
+  }
+});
+
+// 5. Sleep Donut
+new Chart(document.getElementById('sleepDonut'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Average Sleep', 'Good Sleep', 'Poor Sleep'],
+    datasets: [{
+      data: [481, 479, 240],
+      backgroundColor: ['#ff9f0a','#00ff9d','#ff4d8d'],
+      borderColor: '#101d30',
+      borderWidth: 3,
+      hoverOffset: 8
+    }]
+  },
+  options: {
+    cutout: '65%',
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 16, boxWidth: 12 } },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw} teens` } }
+    }
+  }
+});
+
+// 6. Age Line Chart
+new Chart(document.getElementById('ageLine'), {
+  type: 'line',
+  data: {
+    labels: ['13', '14', '15', '16', '17', '18', '19'],
+    datasets: [
+      {
+        label: 'Stress Level',
+        data: [5.46, 6.18, 5.13, 5.45, 5.17, 5.20, 5.62],
+        borderColor: '#ff4d8d',
+        backgroundColor: 'rgba(255,77,141,0.1)',
+        tension: 0.4,
+        fill: true,
+        pointRadius: 5,
+        pointBackgroundColor: '#ff4d8d',
+        borderWidth: 2
+      },
+      {
+        label: 'Anxiety Level',
+        data: [5.56, 5.33, 5.92, 5.64, 5.58, 5.42, 6.00],
+        borderColor: '#00e5ff',
+        backgroundColor: 'rgba(0,229,255,0.07)',
+        tension: 0.4,
+        fill: true,
+        pointRadius: 5,
+        pointBackgroundColor: '#00e5ff',
+        borderWidth: 2
+      },
+      {
+        label: 'Avg Social Media (hrs)',
+        data: [4.51, 4.35, 4.72, 4.64, 4.76, 4.24, 4.52],
+        borderColor: '#00ff9d',
+        backgroundColor: 'transparent',
+        tension: 0.4,
+        pointRadius: 4,
+        pointBackgroundColor: '#00ff9d',
+        borderWidth: 2,
+        borderDash: [5,3]
+      }
+    ]
+  },
+  options: {
+    plugins: { legend: { position: 'top', labels: { padding: 12, boxWidth: 10 } } },
+    scales: {
+      x: { grid: { color: '#1a2d47' }, title: { display: true, text: 'Age (years)', color: '#6a85a8' } },
+      y: { grid: { color: '#1a2d47' }, min: 4, max: 7 }
+    }
+  }
+});
+
+// 7. Social Interaction Bar
+new Chart(document.getElementById('socialBar'), {
+  type: 'bar',
+  data: {
+    labels: ['High', 'Medium', 'Low'],
+    datasets: [
+      {
+        label: 'Mental Health',
+        data: [5.60, 5.60, 5.45],
+        backgroundColor: '#a78bfa88',
+        borderColor: '#a78bfa',
+        borderWidth: 2,
+        borderRadius: 6
+      },
+      {
+        label: 'Wellness',
+        data: [3.50, 3.47, 3.48],
+        backgroundColor: '#00ff9d44',
+        borderColor: '#00ff9d',
+        borderWidth: 2,
+        borderRadius: 6
+      }
+    ]
+  },
+  options: {
+    plugins: { legend: { position: 'top', labels: { padding: 12, boxWidth: 10 } } },
+    scales: {
+      x: { grid: { color: '#1a2d47' } },
+      y: { grid: { color: '#1a2d47' }, min: 0, max: 7 }
+    }
+  }
+});
+
+// 8. Platform vs Stress/Anxiety
+new Chart(document.getElementById('platformStress'), {
+  type: 'radar',
+  data: {
+    labels: ['Stress Level', 'Anxiety Level', 'MH Score', 'Depression %'],
+    datasets: [
+      {
+        label: 'Instagram',
+        data: [5.50, 5.67, 5.58, 2.4],
+        borderColor: '#ff4d8d',
+        backgroundColor: 'rgba(255,77,141,0.15)',
+        pointBackgroundColor: '#ff4d8d',
+        borderWidth: 2,
+        pointRadius: 4
+      },
+      {
+        label: 'TikTok',
+        data: [5.29, 5.75, 5.55, 3.0],
+        borderColor: '#00e5ff',
+        backgroundColor: 'rgba(0,229,255,0.1)',
+        pointBackgroundColor: '#00e5ff',
+        borderWidth: 2,
+        pointRadius: 4
+      },
+      {
+        label: 'Both',
+        data: [5.55, 5.49, 5.51, 2.3],
+        borderColor: '#a78bfa',
+        backgroundColor: 'rgba(167,139,250,0.1)',
+        pointBackgroundColor: '#a78bfa',
+        borderWidth: 2,
+        pointRadius: 4
+      }
+    ]
+  },
+  options: {
+    scales: {
+      r: {
+        grid: { color: '#1a2d47' },
+        angleLines: { color: '#1a2d47' },
+        ticks: { display: false },
+        pointLabels: { font: { size: 11 }, color: '#6a85a8' }
+      }
+    },
+    plugins: { legend: { position: 'bottom', labels: { padding: 14, boxWidth: 10 } } }
+  }
+});
+
+// 9. Addiction Distribution
+new Chart(document.getElementById('addictionBar'), {
+  type: 'bar',
+  data: {
+    labels: ['1','2','3','4','5','6','7','8','9','10'],
+    datasets: [{
+      label: 'Teens',
+      data: [109, 120, 117, 117, 114, 134, 124, 132, 118, 115],
+      backgroundColor: [
+        '#00ff9d88','#00ff9d88','#00e5ff88','#00e5ff88',
+        '#ff9f0a88','#ff9f0a88','#ff4d8d88','#ff4d8d88',
+        '#a78bfa88','#a78bfa88'
+      ],
+      borderColor: [
+        '#00ff9d','#00ff9d','#00e5ff','#00e5ff',
+        '#ff9f0a','#ff9f0a','#ff4d8d','#ff4d8d',
+        '#a78bfa','#a78bfa'
+      ],
+      borderWidth: 2,
+      borderRadius: 4
+    }]
+  },
+  options: {
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: '#1a2d47' }, title: { display: true, text: 'Addiction Level', color: '#6a85a8' } },
+      y: { grid: { color: '#1a2d47' }, beginAtZero: true }
+    }
+  }
+});
+
+// 10. Depression by Platform
+new Chart(document.getElementById('depressionPlatform'), {
+  type: 'bar',
+  data: {
+    labels: ['Instagram', 'TikTok', 'Both'],
+    datasets: [{
+      label: 'Depression Rate (%)',
+      data: [2.4, 3.0, 2.3],
+      backgroundColor: ['#ff4d8d66','#a78bfa66','#00e5ff66'],
+      borderColor: ['#ff4d8d','#a78bfa','#00e5ff'],
+      borderWidth: 2,
+      borderRadius: 8
+    }]
+  },
+  options: {
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: '#1a2d47' } },
+      y: { grid: { color: '#1a2d47' }, min: 0, max: 4, title: { display: true, text: 'Depression %', color: '#6a85a8' } }
+    }
+  }
+});
+
+// 11. Correlation Bar
+new Chart(document.getElementById('corrChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Anxiety Lvl', 'Stress Lvl', 'Addiction', 'Depression', 'Age', 'Social Media', 'Physical Act.', 'Sleep Hrs', 'Wellness'],
+    datasets: [{
+      label: 'Correlation (r)',
+      data: [0.594, 0.585, 0.579, 0.187, 0.018, 0.019, 0.009, -0.044, -0.042],
+      backgroundColor: ctx => ctx.raw >= 0 ? 'rgba(255,77,141,0.6)' : 'rgba(0,255,157,0.5)',
+      borderColor: ctx => ctx.raw >= 0 ? '#ff4d8d' : '#00ff9d',
+      borderWidth: 2,
+      borderRadius: 4
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: '#1a2d47' }, min: -0.1, max: 0.7 },
+      y: { grid: { color: '#1a2d47' } }
+    }
+  }
+});
+
+// 12. Academic vs Wellness
+new Chart(document.getElementById('acadWellness'), {
+  type: 'scatter',
+  data: {
+    datasets: [{
+      label: 'Teen Samples',
+      data: [
+        {x:2.0,y:3.2},{x:2.2,y:3.0},{x:2.5,y:3.15},{x:2.7,y:3.3},
+        {x:2.8,y:3.35},{x:2.9,y:3.4},{x:3.0,y:3.5},{x:3.1,y:3.55},
+        {x:3.2,y:3.6},{x:3.3,y:3.7},{x:3.5,y:3.75},{x:3.7,y:3.8},
+        {x:3.8,y:3.85},{x:3.9,y:3.9},{x:4.0,y:4.0},{x:2.4,y:2.9},
+        {x:2.6,y:3.1},{x:3.4,y:3.65},{x:3.6,y:3.72},{x:2.1,y:2.8}
+      ],
+      backgroundColor: 'rgba(0,229,255,0.5)',
+      borderColor: '#00e5ff',
+      pointRadius: 5,
+      pointHoverRadius: 8
+    }]
+  },
+  options: {
+    plugins: { legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ` GPA: ${ctx.raw.x} → Wellness: ${ctx.raw.y}` } }
+    },
+    scales: {
+      x: { grid: { color: '#1a2d47' }, title: { display: true, text: 'Academic Performance (GPA)', color: '#6a85a8' }, min: 1.8, max: 4.2 },
+      y: { grid: { color: '#1a2d47' }, title: { display: true, text: 'Wellness Score', color: '#6a85a8' }, min: 2.5, max: 4.2 }
+    }
+  }
+});
+</script>
+</body>
+</html>
