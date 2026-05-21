@@ -4,7 +4,7 @@ DASHBOARD URL (Claude): https://claude.ai/public/artifacts/994e3ad3-df40-4df7-ab
 
 DASHBOARD URL (Netlify): https://impacts-on-teenager-dashboard.netlify.app
 
-REPORT URL (Netlify): https://astonishing-centaur-adbe96.netlify.app
+REPORT URL (Netlify): astonishing-centaur-adbe96.netlify.app
 
 ## 📌 Project Overview
 This project analyzes the impact of social media usage on teenagers’ mental health, lifestyle, sleep quality, and academic performance using Python data analysis techniques.
