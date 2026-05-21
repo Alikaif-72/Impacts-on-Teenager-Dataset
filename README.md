@@ -1,5 +1,8 @@
 # 📱 Social Media Impact on Teenagers – Data Analysis Project
 
+DASHBOARD URL (Claude): https://claude.ai/public/artifacts/994e3ad3-df40-4df7-ab3e-8ea9f2abcae6
+DASHBOARD URL (Netlify): impacts-on-teenager-dashboard.netlify.app
+
 ## 📌 Project Overview
 This project analyzes the impact of social media usage on teenagers’ mental health, lifestyle, sleep quality, and academic performance using Python data analysis techniques.
 
